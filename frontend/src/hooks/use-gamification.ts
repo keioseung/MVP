@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import { UserProfile, Badge, Achievement, DailyMission, Goal, StudySession, ReviewItem } from '@/types'
+import { UserProfile, Badge, GameAchievement, DailyMission, Goal, StudySession, ReviewItem } from '@/types'
 
 // 🎮 게임화 시스템 훅
 export function useGamification(sessionId: string) {
@@ -373,7 +373,7 @@ function calculateDifficulty(accuracy: number, currentDifficulty: number): numbe
   return Math.max(currentDifficulty - 1, 1)
 }
 
-function getInitialAchievements(): Achievement[] {
+function getInitialAchievements(): GameAchievement[] {
   return [
     {
       id: 'first_study',
@@ -498,7 +498,7 @@ function showBadgeUnlockedNotification(badge: Badge) {
   console.log(`🏆 새 배지 획득: ${badge.name}`)
 }
 
-function showAchievementCompletedNotification(achievement: Achievement) {
+function showAchievementCompletedNotification(achievement: GameAchievement) {
   console.log(`✨ 업적 달성: ${achievement.name}`)
 }
 
