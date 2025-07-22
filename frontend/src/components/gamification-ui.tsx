@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   FaTrophy, FaFire, FaStar, FaGem, FaCrown, FaRocket, 
   FaThumbsUp, FaHeart, FaBolt, FaShield, FaMagic,
-  FaChartLine, FaMedal, FaGift, FaSparkles
+  FaChartLine, FaMedal, FaGift
 } from 'react-icons/fa'
 import { UserProfile, Badge, GameAchievement, DailyMission } from '@/types'
 
@@ -463,7 +463,7 @@ export function MissionCard({ mission, onClaim, compact = false }: MissionCardPr
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <FaSparkles className="text-blue-400 text-sm" />
+              <FaMagic className="text-blue-400 text-sm" />
               <span className={`text-white font-bold ${compact ? 'text-xs' : 'text-sm'}`}>
                 {mission.reward.xp} XP
               </span>
@@ -626,7 +626,7 @@ export function XPAnimation({ amount, show, onComplete, source }: XPAnimationPro
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 0.5, repeat: 2 }}
             >
-              <FaSparkles className="text-blue-400 text-2xl mx-auto mb-2" />
+              <FaMagic className="text-blue-400 text-2xl mx-auto mb-2" />
             </motion.div>
             <div className="text-white font-bold text-xl">+{amount} XP</div>
             {source && (

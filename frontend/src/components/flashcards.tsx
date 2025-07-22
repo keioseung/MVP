@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { Flashcard } from '@/types'
 import { 
-  FaArrowLeft, FaArrowRight, FaRedo, FaShuffle, FaCheck, FaTimes, 
+  FaArrowLeft, FaArrowRight, FaRedo, FaRandom, FaCheck, FaTimes, 
   FaHeart, FaStar, FaLightbulb, FaBookOpen, FaEye, FaEyeSlash 
 } from 'react-icons/fa'
 
@@ -180,7 +180,7 @@ export function FlashcardStudy({
             onClick={shuffleCards}
             className="glass p-2 rounded-lg hover:bg-white/10 transition-colors"
           >
-            <FaShuffle className="text-white" />
+            <FaRandom className="text-white" />
           </button>
         </div>
       )}

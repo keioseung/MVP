@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Notification, Badge, GameAchievement } from '@/types'
 import { 
   FaBell, FaTrophy, FaStar, FaFire, FaGift, FaInfoCircle,
-  FaExclamationTriangle, FaCheckCircle, FaTimes, FaSparkles
+  FaExclamationTriangle, FaCheckCircle, FaTimes
 } from 'react-icons/fa'
 
 // 알림 컨텍스트
@@ -487,7 +487,7 @@ function AchievementPopup({ achievement, onClose }: AchievementPopupProps) {
             {/* 보상 */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="glass rounded-xl p-3">
-                <FaSparkles className="text-blue-400 mx-auto mb-1" />
+                <FaStar className="text-blue-400 mx-auto mb-1" />
                 <div className="text-lg font-bold text-white">+{achievement.reward.xp}</div>
                 <div className="text-xs text-white/60">XP</div>
               </div>
@@ -652,7 +652,7 @@ function LevelUpPopup({ levelData, onClose }: LevelUpPopupProps) {
           {levelData.rewards && (
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="glass rounded-xl p-3">
-                <FaSparkles className="text-blue-400 mx-auto mb-1" />
+                <FaStar className="text-blue-400 mx-auto mb-1" />
                 <div className="text-lg font-bold text-white">+{levelData.rewards.xp}</div>
                 <div className="text-xs text-white/60">보너스 XP</div>
               </div>

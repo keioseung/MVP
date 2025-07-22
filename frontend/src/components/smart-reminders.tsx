@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { StudyReminder, UserPreferences, Notification } from '@/types'
+import { StudyReminder, UserPreferences } from '@/types'
+import type { Notification } from '@/types'
 import { 
-  FaBell, FaClock, FaPlay, FaPause, FaStop, FaReset,
+  FaBell, FaClock, FaPlay, FaPause, FaStop, FaUndo,
   FaCalendarAlt, FaPlus, FaEdit, FaTrash, FaCoffee,
   FaBrain, FaLeaf, FaSun, FaMoon, FaVolumeUp, FaVolumeOff
 } from 'react-icons/fa'
@@ -246,7 +247,7 @@ export function PomodoroTimer({ onComplete, preferences }: PomodoroTimerProps) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            <FaReset className="text-xl" />
+            <FaUndo className="text-xl" />
           </motion.button>
 
           <motion.button

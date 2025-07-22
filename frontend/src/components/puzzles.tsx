@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Puzzle } from '@/types'
 import { 
   FaPuzzlePiece, FaClock, FaTrophy, FaRocket, FaStar,
-  FaCheckCircle, FaTimesCircle, FaShuffle, FaLightbulb
+  FaCheckCircle, FaTimesCircle, FaRandom, FaLightbulb
 } from 'react-icons/fa'
 
 // 워드 서치 퍼즐 컴포넌트

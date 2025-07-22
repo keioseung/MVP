@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import {
   FaBell, FaRocket, FaTrophy, FaFire, FaCalendarAlt, FaBrain, 
   FaClock, FaUsers, FaChartLine, FaGem, FaStar, FaBookOpen,
-  FaHeart, FaLightbulb, FaPuzzlePiece, FaSparkles, FaGift,
+  FaHeart, FaLightbulb, FaPuzzlePiece, FaGift,
   FaHeadphones, FaGamepad, FaMedal, FaRandom
 } from 'react-icons/fa'
 
@@ -347,7 +347,7 @@ function OverviewSection({ profile, missions, dueReviews, addXP, updateMissionPr
             ))
           ) : (
             <div className="glass rounded-xl p-8 text-center">
-              <FaSparkles className="text-6xl text-white/20 mx-auto mb-4" />
+              <FaStar className="text-6xl text-white/20 mx-auto mb-4" />
               <p className="text-white/60 text-lg mb-2">모든 미션을 완료했습니다!</p>
               <p className="text-white/40 text-sm">내일 새로운 미션이 기다리고 있어요</p>
             </div>
@@ -405,7 +405,7 @@ function StudySection({ addXP, addPoints, updateMissionProgress, showToast }: an
 
   const studyModes = [
     { id: 'ai-info', label: 'AI 정보', icon: FaBrain, path: '/ai-info' },
-    { id: 'quiz', label: '퀴즈', icon: FaSparkles, path: '/quiz' },
+    { id: 'quiz', label: '퀴즈', icon: FaStar, path: '/quiz' },
     { id: 'flashcards', label: '플래시카드', icon: FaBookOpen, component: 'flashcards' },
     { id: 'review', label: '복습', icon: FaRandom, component: 'review' }
   ]
