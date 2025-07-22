@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { NotificationProvider } from '@/components/notification-system'
+import { Providers } from '@/components/providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -55,10 +55,6 @@ export const metadata: Metadata = {
       { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#3b82f6' },
     ],
   },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
-  ],
 }
 
 export const viewport: Viewport = {
@@ -116,9 +112,9 @@ export default function RootLayout({
         <link rel="apple-touch-startup-image" href="/splash-2048x2732.png" media="(min-device-width: 1024px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait)" />
       </head>
       <body className={`${inter.className} bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen`}>
-        <NotificationProvider>
+        <Providers>
           {children}
-        </NotificationProvider>
+        </Providers>
         
         {/* PWA 설치 배너를 위한 스크립트 */}
         <script
