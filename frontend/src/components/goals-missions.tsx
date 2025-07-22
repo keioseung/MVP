@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DailyMission, Goal, UserProfile } from '@/types'
 import { 
-  FaTarget, FaCalendarAlt, FaRocket, FaTrophy, FaGift, FaPlus,
+  FaBullseye, FaCalendarAlt, FaRocket, FaTrophy, FaGift, FaPlus,
   FaEdit, FaTrash, FaCheck, FaTimes, FaClock, FaFire, FaStar,
-  FaChartLine, FaFlag, FaLightbulb, FaBullseye, FaGem
+  FaChartLine, FaFlag, FaLightbulb, FaGem
 } from 'react-icons/fa'
 
 interface GoalsMissionsProps {
@@ -200,7 +200,7 @@ export function GoalsMissions({ userProfile, onUpdateProfile, onClaimReward }: G
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <FaTarget className="text-blue-400 text-2xl" />
+                      <FaBullseye className="text-blue-400 text-2xl" />
           <h2 className="text-2xl font-bold text-white">목표 & 미션</h2>
         </div>
 
