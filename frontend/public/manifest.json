@@ -1,0 +1,149 @@
+{
+  "name": "AI 마스터리 허브 - 인공지능 학습 플랫폼",
+  "short_name": "AI 마스터리",
+  "description": "게임화된 AI 학습 경험으로 인공지능을 마스터하세요. 퀴즈, 플래시카드, 랭킹 시스템과 함께하는 최고의 학습 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["education", "games", "productivity"],
+  "lang": "ko-KR",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "메인 대시보드"
+    },
+    {
+      "src": "/screenshot-mobile-2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "학습 진행률"
+    },
+    {
+      "src": "/screenshot-desktop-1.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "데스크톱 대시보드"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "퀴즈 풀기",
+      "short_name": "퀴즈",
+      "description": "AI 퀴즈를 풀어보세요",
+      "url": "/quiz",
+      "icons": [
+        {
+          "src": "/shortcut-quiz.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "AI 정보 학습",
+      "short_name": "AI 학습",
+      "description": "새로운 AI 지식을 학습하세요",
+      "url": "/ai-info",
+      "icons": [
+        {
+          "src": "/shortcut-ai.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "랭킹 확인",
+      "short_name": "랭킹",
+      "description": "내 순위를 확인하세요",
+      "url": "/dashboard?section=social",
+      "icons": [
+        {
+          "src": "/shortcut-ranking.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "features": [
+    "gamification",
+    "offline-support",
+    "push-notifications",
+    "background-sync"
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+aimastery",
+      "url": "/?share=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/import",
+      "accept": {
+        "application/json": [".json"],
+        "text/plain": [".txt"]
+      }
+    }
+  ]
+} 

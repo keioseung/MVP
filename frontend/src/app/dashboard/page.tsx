@@ -1,542 +1,779 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FaRobot, FaArrowRight, FaGlobe, FaCode, FaBrain, FaRocket, FaChartLine, FaTrophy, FaLightbulb, FaUsers, FaBookOpen, FaCalendar, FaClipboard, FaBullseye, FaFire, FaStar, FaCrosshairs, FaChartBar } from 'react-icons/fa'
-import { TrendingUp, Calendar, Trophy, Sun, Target, BarChart3, BookOpen } from 'lucide-react'
-import Sidebar from '@/components/sidebar'
-import AIInfoCard from '@/components/ai-info-card'
-import TermsQuizSection from '@/components/terms-quiz-section'
-import ProgressSection from '@/components/progress-section'
-import LearnedTermsSection from '@/components/learned-terms-section'
-import useAIInfo from '@/hooks/use-ai-info'
-import useUserProgress, { useUserStats } from '@/hooks/use-user-progress'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useFetchAINews } from '@/hooks/use-ai-info'
-import { useQueryClient } from '@tanstack/react-query'
-import { userProgressAPI } from '@/lib/api'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  FaBell, FaRocket, FaTrophy, FaFire, FaCalendarAlt, FaBrain, 
+  FaClock, FaUsers, FaChartLine, FaGem, FaStar, FaBookOpen,
+  FaHeart, FaLightbulb, FaPuzzlePiece, FaSparkles, FaGift,
+  FaHeadphones, FaGamepad, FaMedal, FaRandom
+} from 'react-icons/fa'
 
-// 예시 용어 데이터
-const TERMS = [
-  { term: '딥러닝', desc: '인공신경망을 기반으로 한 기계학습의 한 분야로, 대량의 데이터에서 패턴을 학습합니다.' },
-  { term: '과적합', desc: '모델이 학습 데이터에 너무 맞춰져서 새로운 데이터에 일반화가 잘 안 되는 현상.' },
-  { term: '정규화', desc: '데이터의 범위를 일정하게 맞추거나, 모델의 복잡도를 제한하는 기법.' },
-  { term: '파라미터', desc: '모델이 학습을 통해 조정하는 값(가중치 등).' },
-  { term: '하이퍼파라미터', desc: '학습 전에 사람이 직접 설정하는 값(학습률, 배치 크기 등).' },
-  { term: '배치', desc: '한 번에 모델에 입력되는 데이터 묶음.' },
-  { term: '드롭아웃', desc: '신경망 학습 시 일부 뉴런을 임의로 꺼서 과적합을 방지하는 기법.' },
-  { term: '활성화 함수', desc: '신경망에서 입력 신호를 출력 신호로 변환하는 함수.' },
-  { term: '임베딩', desc: '고차원 데이터를 저차원 벡터로 변환하는 표현 방법.' },
-  { term: '컨볼루션', desc: '합성곱 신경망(CNN)에서 특징을 추출하는 연산.' },
-]
+// 새로운 컴포넌트들 import
+import { LevelXPDisplay, StreakCounter, PointsDisplay, BadgeGrid, MissionCard, AchievementCard } from '@/components/gamification-ui'
+import { LearningHeatmap, MobileHeatmap } from '@/components/heatmap'
+import { FlashcardStudy } from '@/components/flashcards'
+import { WordSearchPuzzle, MatchingGame } from '@/components/puzzles'
+import { LeaderboardDisplay, FriendsSystem, CompetitionSystem } from '@/components/leaderboard'
+import { PomodoroTimer, SmartReminders, StudyCalendar } from '@/components/smart-reminders'
+import { NotificationCenter, useNotifications } from '@/components/notification-system'
+import { useGamification, useMissions, useReviewSystem } from '@/hooks/use-gamification'
 
-// 1. 주간 학습 현황 막대 그래프 컴포넌트 추가 (탭 위에)
-function WeeklyBarGraph({ weeklyData }: { weeklyData: any[] }) {
-  const maxAI = 3;
-  const maxTerms = 20;
-  const maxQuiz = 100;
-  return (
-    <div className="w-full max-w-3xl mx-auto mb-8">
-      <div className="flex justify-between mb-2 px-2">
-        {weeklyData.map((day, idx) => (
-          <div key={idx} className={`text-xs font-bold text-center ${day.isToday ? 'text-yellow-400' : 'text-white/60'}`}>{day.day}</div>
-        ))}
-      </div>
-      <div className="flex gap-2 h-32 items-end">
-        {weeklyData.map((day, idx) => {
-          const aiHeight = Math.round((day.ai / maxAI) * 80);
-          const termsHeight = Math.round((day.terms / maxTerms) * 80);
-          const quizHeight = Math.round((day.quiz / maxQuiz) * 80);
-          return (
-            <div key={idx} className="flex-1 flex flex-col items-center">
-              <div className="flex flex-col-reverse h-28 w-6 relative">
-                {/* 퀴즈 */}
-                <div style={{ height: `${quizHeight}px` }} className="w-full bg-gradient-to-t from-green-500 to-emerald-400 rounded-t-md" />
-                {/* 용어 */}
-                <div style={{ height: `${termsHeight}px` }} className="w-full bg-gradient-to-t from-purple-500 to-pink-400" />
-                {/* AI 정보 */}
-                <div style={{ height: `${aiHeight}px` }} className="w-full bg-gradient-to-t from-blue-500 to-cyan-400 rounded-b-md" />
-                {day.isToday && <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs text-yellow-400 font-bold">오늘</div>}
-              </div>
-              <div className="mt-1 text-xs text-white/70">{day.ai + day.terms + Math.round(day.quiz/10)}</div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex justify-between mt-2 px-2 text-[10px] text-white/40">
-        <div>AI</div><div>용어</div><div>퀴즈</div>
-      </div>
-    </div>
-  );
-}
-
-export default function DashboardPage() {
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date()
-    return today.toISOString().split('T')[0]
-  })
-  const [sessionId] = useState(() => {
-    if (typeof window !== 'undefined') {
-      let id = localStorage.getItem('sessionId')
-      if (!id) {
-        id = Math.random().toString(36).substring(2, 15)
-        localStorage.setItem('sessionId', id)
-      }
-      return id
-    }
-    return 'default'
-  })
-  const { data: aiInfo, isLoading: aiInfoLoading } = useAIInfo(selectedDate)
-  const { data: userProgress, isLoading: progressLoading } = useUserProgress(sessionId)
-  const { data: userStats } = useUserStats(sessionId)
+export default function Dashboard() {
   const router = useRouter()
-  const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState<'ai' | 'quiz' | 'progress' | 'news' | 'term'>('ai')
-  const { data: news, isLoading: newsLoading } = useFetchAINews()
-  const [randomTerm, setRandomTerm] = useState(() => TERMS[Math.floor(Math.random() * TERMS.length)])
-  
-  // 타이핑 애니메이션 상태
-  const [typedText, setTypedText] = useState('')
-  const [isTyping, setIsTyping] = useState(true)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const fullText = "AI Mastery Hub"
-  
-  // 환영 메시지 애니메이션
-  const [currentWelcome, setCurrentWelcome] = useState(0)
-  const welcomeMessages = [
-    "오늘도 AI 학습을 시작해보세요! 🚀",
-    "새로운 지식이 여러분을 기다리고 있어요! 💡",
-    "함께 성장하는 AI 여정을 떠나볼까요? 🌟"
-  ]
+  const [sessionId, setSessionId] = useState<string>('')
+  const [activeSection, setActiveSection] = useState<string>('overview')
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleRandomTerm = () => {
-    setRandomTerm(TERMS[Math.floor(Math.random() * TERMS.length)])
-  }
+  // 게임화 시스템 훅들
+  const { 
+    profile, 
+    isLoading: gamificationLoading,
+    addXP, 
+    addPoints, 
+    unlockBadge, 
+    updateAchievement, 
+    updateStreak 
+  } = useGamification(sessionId)
 
-  // 타이핑 애니메이션
+  const { missions, updateMissionProgress } = useMissions(sessionId)
+  const { reviewItems, getDueReviews } = useReviewSystem(sessionId)
+  const { addNotification, showToast, showAchievement, showLevelUp } = useNotifications()
+
+  // 초기화
   useEffect(() => {
-    if (currentIndex < fullText.length) {
-      const timeout = setTimeout(() => {
-        setTypedText(fullText.slice(0, currentIndex + 1))
-        setCurrentIndex(currentIndex + 1)
-      }, 150)
-      return () => clearTimeout(timeout)
-    } else {
-      setIsTyping(false)
-    }
-  }, [currentIndex, fullText])
-
-  // 환영 메시지 순환
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWelcome((prev) => (prev + 1) % welcomeMessages.length)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [welcomeMessages.length])
-
-  useEffect(() => {
-    const userStr = localStorage.getItem('currentUser')
-    if (!userStr) {
-      router.replace('/auth')
+    const storedSessionId = localStorage.getItem('sessionId')
+    if (!storedSessionId) {
+      router.push('/auth')
       return
     }
-    const user = JSON.parse(userStr)
-    if (user.role !== 'user') {
-      router.replace('/admin')
-    }
+    
+    setSessionId(storedSessionId)
+    updateStreak() // 스트릭 업데이트
+    setIsLoading(false)
   }, [router])
 
-  // 학습 진행률 계산 (로컬 스토리지와 백엔드 데이터 통합)
-  const totalAIInfo = aiInfo?.length || 0
-  
-  // 로컬 스토리지에서 학습 상태 확인 (강제 업데이트 포함)
-  const localProgress = (() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('userProgress')
-        if (stored) {
-          const parsed = JSON.parse(stored)
-          return parsed[sessionId]?.[selectedDate] || []
-        }
-      } catch (error) {
-        console.error('Failed to parse local progress:', error)
-      }
+  // 메뉴 섹션들
+  const sections = [
+    { 
+      id: 'overview', 
+      label: '개요', 
+      icon: FaRocket, 
+      color: 'from-blue-500 to-cyan-500',
+      description: '전체 학습 현황과 진행상황'
+    },
+    { 
+      id: 'study', 
+      label: '학습', 
+      icon: FaBrain, 
+      color: 'from-green-500 to-emerald-500',
+      description: 'AI 정보, 퀴즈, 플래시카드 학습'
+    },
+    { 
+      id: 'games', 
+      label: '게임', 
+      icon: FaGamepad, 
+      color: 'from-purple-500 to-pink-500',
+      description: '퍼즐, 워드서치, 매칭게임'
+    },
+    { 
+      id: 'social', 
+      label: '소셜', 
+      icon: FaUsers, 
+      color: 'from-orange-500 to-red-500',
+      description: '친구, 랭킹, 대회 시스템'
+    },
+    { 
+      id: 'focus', 
+      label: '집중', 
+      icon: FaClock, 
+      color: 'from-red-500 to-pink-500',
+      description: '뽀모도로, 알림, 캘린더'
+    },
+    { 
+      id: 'progress', 
+      label: '진행률', 
+      icon: FaChartLine, 
+      color: 'from-yellow-500 to-orange-500',
+      description: '학습 분석, 히트맵, 통계'
     }
-    return []
-  })()
-  
-  // 백엔드 데이터와 로컬 데이터 통합
-  const backendProgress = userProgress?.[selectedDate] || []
-  const learnedAIInfo = Math.max(localProgress.length, backendProgress.length)
-  const aiInfoProgress = totalAIInfo > 0 ? (learnedAIInfo / totalAIInfo) * 100 : 0
+  ]
 
-  const totalTerms = 60 // 3개 AI 정보 × 20개 용어씩
-  const learnedTerms = Array.isArray(userProgress?.total_terms_learned) ? userProgress.total_terms_learned.length : (userProgress?.total_terms_learned ?? 0)
-  const termsProgress = totalTerms > 0 ? (learnedTerms / totalTerms) * 100 : 0
-
-  // 퀴즈 점수 계산 - 당일 푼 전체 문제수가 분모, 정답 맞춘 총 개수가 분자
-  const quizScore = (() => {
-    if (typeof userProgress?.quiz_score === 'number') {
-      return Math.min(userProgress.quiz_score, 100)
-    }
-    if (Array.isArray(userProgress?.quiz_score)) {
-      const totalQuestions = userProgress.quiz_score.length
-      const correctAnswers = userProgress.quiz_score.filter(score => score > 0).length
-      return totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0
-    }
-    return 0
-  })()
-  const maxQuizScore = 100
-  const quizProgress = (quizScore / maxQuizScore) * 100
-
-  const streakDays = Array.isArray(userProgress?.streak_days) ? userProgress.streak_days.length : (userProgress?.streak_days ?? 0)
-  const maxStreak = Array.isArray(userProgress?.max_streak) ? userProgress.max_streak.length : (userProgress?.max_streak ?? 0)
-  const streakProgress = maxStreak > 0 ? (streakDays / maxStreak) * 100 : 0
-
-  // 오늘 날짜 확인
-  const today = new Date()
-  const todayDay = today.getDay() // 0: 일요일, 1: 월요일, ..., 6: 토요일
-
-  // 주간 학습 데이터 - 실제 사용자 데이터 기반 (월~일 7일 모두)
-  const getWeeklyDates = () => {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0: 일, 1: 월, ...
-    // 이번주 월요일 구하기
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
-    // 7일치 날짜 배열 생성
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      return d;
-    });
-  };
-  const weeklyDates = getWeeklyDates();
-  const weeklyData = weeklyDates.map((dateObj, idx) => {
-    const dateStr = dateObj.toISOString().split('T')[0];
-    // AI 정보, 용어, 퀴즈 데이터 추출 (userProgress 기준)
-    const ai = Array.isArray(userProgress?.[dateStr]) ? userProgress[dateStr].length : 0;
-    const termsArr =
-      userProgress &&
-      typeof userProgress.terms_by_date === 'object' &&
-      userProgress.terms_by_date !== null &&
-      !Array.isArray(userProgress.terms_by_date) &&
-      Object.prototype.hasOwnProperty.call(userProgress.terms_by_date, dateStr)
-        ? (userProgress.terms_by_date as Record<string, any[]>)[dateStr]
-        : undefined;
-    const terms = Array.isArray(termsArr) ? termsArr.length : 0;
-    let quiz = 0;
-    const quizScoreArr =
-      userProgress &&
-      typeof userProgress.quiz_score_by_date === 'object' &&
-      userProgress.quiz_score_by_date !== null &&
-      !Array.isArray(userProgress.quiz_score_by_date) &&
-      Object.prototype.hasOwnProperty.call(userProgress.quiz_score_by_date, dateStr)
-        ? (userProgress.quiz_score_by_date as Record<string, any[]>)[dateStr]
-        : undefined;
-    if (Array.isArray(quizScoreArr)) {
-      const totalQuestions = quizScoreArr.length;
-      const correctAnswers = quizScoreArr.filter((score: number) => score > 0).length;
-      quiz = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-    } else if (typeof quizScoreArr === 'number') {
-      quiz = quizScoreArr;
-    }
-    // 오늘 여부
-    const isToday = dateStr === selectedDate;
-    // 요일명
-    const days = ['월', '화', '수', '목', '금', '토', '일'];
-    return {
-      day: days[idx],
-      ai,
-      terms,
-      quiz,
-      isToday,
-    };
-  });
-
-  // 오늘 학습 데이터 반영
-  const todayIndex = todayDay === 0 ? 6 : todayDay - 1 // 일요일은 인덱스 6
-  weeklyData[todayIndex].ai = learnedAIInfo
-  weeklyData[todayIndex].terms = learnedTerms
-  weeklyData[todayIndex].quiz = Math.min(quizScore, 100) // 퀴즈 점수는 최대 100점
-
-  // AI 정보 3개만 정확히 보여줌
-  const aiInfoFixed = aiInfo && aiInfo.length > 0 ? aiInfo.slice(0, 3) : []
-
-  const [forceUpdate, setForceUpdate] = useState(0)
-  
-  // 진행률 업데이트 핸들러
-  const handleProgressUpdate = () => {
-    queryClient.invalidateQueries({ queryKey: ['user-progress', sessionId] })
-    queryClient.invalidateQueries({ queryKey: ['user-stats', sessionId] })
-    queryClient.invalidateQueries({ queryKey: ['learned-terms', sessionId] })
-    setForceUpdate(prev => prev + 1) // 강제 리렌더링
+  if (isLoading || gamificationLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
+        <motion.div
+          className="glass rounded-2xl p-8 text-center"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        >
+          <FaRocket className="text-6xl text-blue-400 mx-auto mb-4" />
+          <p className="text-white text-lg">학습 환경을 준비중입니다...</p>
+        </motion.div>
+      </div>
+    )
   }
 
-  // 새로고침 핸들러(탭별)
-  const handleRefresh = () => window.location.reload()
-
-  // 토스트 알림 상태
-  const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null)
-  const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 2500)
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
+        <div className="text-center text-white">
+          <p>프로필을 로드할 수 없습니다.</p>
+        </div>
+      </div>
+    )
   }
+
+  const dueReviews = getDueReviews()
+  const unreadNotifications = 0 // 실제 구현에서는 알림 개수
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden px-4">
-      {/* 고급스러운 배경 효과 */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,119,198,0.15),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(120,119,255,0.15),transparent_50%)]" />
-      
-      {/* 움직이는 파티클 효과 */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden">
+      {/* 배경 애니메이션 */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white/20 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 4}s`
-            }}
-          />
-        ))}
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-blue-500/5 rounded-full animate-pulse" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-purple-500/5 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      {/* 토스트 알림 */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -30 }}
-            className="fixed top-8 left-1/2 z-50 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-xl text-white font-bold text-lg glass"
-          >
-            {toast.message}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="relative z-10">
+        {/* 헤더 */}
+        <header className="glass border-b border-white/10 sticky top-0 z-30">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              {/* 로고 및 사용자 정보 */}
+              <div className="flex items-center gap-4">
+                <motion.div
+                  className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center"
+                  whileHover={{ scale: 1.1, rotate: 10 }}
+                >
+                  <FaRocket className="text-white text-xl" />
+                </motion.div>
+                <div className="hidden md:block">
+                  <h1 className="text-xl font-bold text-white">AI 마스터리 허브</h1>
+                  <p className="text-white/60 text-sm">안녕하세요, {sessionId}님!</p>
+                </div>
+              </div>
 
-      {/* 헤더 섹션 */}
-      <div className="relative z-10 flex flex-col items-center justify-center pt-8 md:pt-12 pb-6">
-        {/* 상단 아이콘과 제목 */}
-        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 mb-6 md:mb-8 text-center md:text-left">
-          <div className="relative">
-            <span className="text-5xl md:text-6xl text-purple-400 drop-shadow-2xl animate-bounce-slow">
-              <FaRobot />
-            </span>
-            <div className="absolute -top-2 -right-2 w-4 h-4 md:w-6 md:h-6 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full animate-pulse" />
-          </div>
-          <div className="flex flex-col items-center md:items-start">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent drop-shadow-2xl tracking-tight leading-tight">
-              {typedText}
-              {isTyping && <span className="animate-blink">|</span>}
-            </h1>
-            <div className="h-6 md:h-8 mt-2">
-              <p className="text-lg md:text-xl lg:text-2xl text-purple-300 font-medium animate-fade-in-out">
-                {welcomeMessages[currentWelcome]}
-              </p>
+              {/* 메인 스탯 (모바일 최적화) */}
+              <div className="flex items-center gap-3 md:gap-6">
+                <LevelXPDisplay profile={profile} size="small" />
+                <div className="hidden sm:block">
+                  <StreakCounter 
+                    streakDays={profile.streakDays} 
+                    maxStreak={profile.maxStreak} 
+                    size="small" 
+                  />
+                </div>
+                <PointsDisplay points={profile.points} size="small" showIcon={false} />
+                
+                {/* 알림 버튼 */}
+                <motion.button
+                  className="relative p-3 glass rounded-xl"
+                  onClick={() => setShowNotifications(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <FaBell className="text-blue-400 text-lg" />
+                  {unreadNotifications > 0 && (
+                    <motion.div
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring" }}
+                    >
+                      {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                    </motion.div>
+                  )}
+                </motion.button>
+              </div>
             </div>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-6 space-y-6">
+          {/* 섹션 네비게이션 */}
+          <div className="overflow-x-auto pb-2">
+            <div className="flex gap-2 min-w-max">
+              {sections.map((section, index) => (
+                <motion.button
+                  key={section.id}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 rounded-xl font-medium whitespace-nowrap
+                    ${activeSection === section.id 
+                      ? `bg-gradient-to-r ${section.color} text-white shadow-lg` 
+                      : 'glass text-white/70 hover:text-white hover:bg-white/10'
+                    }
+                  `}
+                  onClick={() => setActiveSection(section.id)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <section.icon className="text-lg" />
+                  <span className="hidden sm:inline">{section.label}</span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          {/* 메인 콘텐츠 */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSection}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {renderSectionContent(activeSection, {
+                profile,
+                missions,
+                dueReviews,
+                sessionId,
+                addXP,
+                addPoints,
+                updateMissionProgress,
+                showToast,
+                showAchievement
+              })}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* 알림 센터 */}
+      <NotificationCenter 
+        show={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+      />
+    </div>
+  )
+}
+
+// 섹션 콘텐츠 렌더링 함수
+function renderSectionContent(section: string, props: any) {
+  const { profile, missions, dueReviews, sessionId } = props
+
+  switch (section) {
+    case 'overview':
+      return <OverviewSection {...props} />
+    case 'study':
+      return <StudySection {...props} />
+    case 'games':
+      return <GamesSection {...props} />
+    case 'social':
+      return <SocialSection {...props} />
+    case 'focus':
+      return <FocusSection {...props} />
+    case 'progress':
+      return <ProgressSection {...props} />
+    default:
+      return <OverviewSection {...props} />
+  }
+}
+
+// 📊 개요 섹션
+function OverviewSection({ profile, missions, dueReviews, addXP, updateMissionProgress }: any) {
+  const todayMissions = missions.filter((m: any) => !m.isCompleted).slice(0, 3)
+  const completedToday = missions.filter((m: any) => m.isCompleted).length
+
+  return (
+    <div className="space-y-6">
+      {/* 빠른 스탯 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          className="glass rounded-2xl p-6 text-center border border-blue-400/30"
+          whileHover={{ scale: 1.02 }}
+        >
+          <FaTrophy className="text-yellow-400 text-3xl mx-auto mb-3" />
+          <div className="text-2xl font-bold text-white mb-1">{profile.level}</div>
+          <div className="text-white/60 text-sm">레벨</div>
+        </motion.div>
+
+        <motion.div
+          className="glass rounded-2xl p-6 text-center border border-green-400/30"
+          whileHover={{ scale: 1.02 }}
+        >
+          <FaFire className="text-orange-400 text-3xl mx-auto mb-3" />
+          <div className="text-2xl font-bold text-white mb-1">{profile.streakDays}</div>
+          <div className="text-white/60 text-sm">연속 학습</div>
+        </motion.div>
+
+        <motion.div
+          className="glass rounded-2xl p-6 text-center border border-purple-400/30"
+          whileHover={{ scale: 1.02 }}
+        >
+          <FaGem className="text-purple-400 text-3xl mx-auto mb-3" />
+          <div className="text-2xl font-bold text-white mb-1">{profile.points.toLocaleString()}</div>
+          <div className="text-white/60 text-sm">포인트</div>
+        </motion.div>
+
+        <motion.div
+          className="glass rounded-2xl p-6 text-center border border-red-400/30"
+          whileHover={{ scale: 1.02 }}
+        >
+          <FaHeart className="text-red-400 text-3xl mx-auto mb-3" />
+          <div className="text-2xl font-bold text-white mb-1">{dueReviews.length}</div>
+          <div className="text-white/60 text-sm">복습 대기</div>
+        </motion.div>
+      </div>
+
+      {/* 오늘의 미션 */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+            <FaStar className="text-yellow-400" />
+            오늘의 미션
+          </h3>
+          <span className="text-white/60 text-sm">{completedToday}/{missions.length} 완료</span>
+        </div>
+
+        <div className="grid gap-4">
+          {todayMissions.length > 0 ? (
+            todayMissions.map((mission: any) => (
+              <MissionCard
+                key={mission.id}
+                mission={mission}
+                compact
+                onClaim={(mission) => {
+                  addXP(mission.reward.xp, `미션: ${mission.name}`)
+                  updateMissionProgress(mission.id, mission.target - mission.current)
+                }}
+              />
+            ))
+          ) : (
+            <div className="glass rounded-xl p-8 text-center">
+              <FaSparkles className="text-6xl text-white/20 mx-auto mb-4" />
+              <p className="text-white/60 text-lg mb-2">모든 미션을 완료했습니다!</p>
+              <p className="text-white/40 text-sm">내일 새로운 미션이 기다리고 있어요</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 배지 및 업적 */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <FaMedal className="text-yellow-400" />
+            최근 배지
+          </h3>
+          <div className="glass rounded-xl p-4">
+            <BadgeGrid 
+              badges={profile.badges.slice(-6)} 
+              maxDisplay={6}
+              size="medium"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <FaTrophy className="text-purple-400" />
+            진행 중인 업적
+          </h3>
+          <div className="space-y-3">
+            {profile.achievements
+              .filter((a: any) => !a.isCompleted)
+              .slice(0, 2)
+              .map((achievement: any) => (
+              <AchievementCard
+                key={achievement.id}
+                achievement={achievement}
+                compact
+              />
+            ))}
           </div>
         </div>
       </div>
 
-      {/* 날짜 선택 (AI 정보 탭에서만 표시) */}
-      {activeTab === 'ai' && (
-        <div className="flex justify-center mb-6 md:mb-8">
-          <div className="glass backdrop-blur-xl rounded-2xl px-4 md:px-8 py-3 md:py-4 flex items-center gap-4 md:gap-6 shadow-xl border border-white/10">
-            <FaCalendar className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
-            <input 
-              type="date" 
-              value={selectedDate} 
-              onChange={e => setSelectedDate(e.target.value)} 
-              className="p-2 md:p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm md:text-lg font-semibold shadow" 
-              style={{ minWidth: 140, maxWidth: 180 }} 
-            />
-            <span className="px-2 md:px-3 py-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-xs md:text-sm shadow">
-              {selectedDate === new Date().toISOString().split('T')[0] ? '오늘' : selectedDate}
-            </span>
-          </div>
+      {/* 모바일 히트맵 */}
+      <div className="block md:hidden">
+        <MobileHeatmap data={[]} months={3} />
+      </div>
+    </div>
+  )
+}
+
+// 📚 학습 섹션
+function StudySection({ addXP, addPoints, updateMissionProgress, showToast }: any) {
+  const [activeStudyMode, setActiveStudyMode] = useState('ai-info')
+
+  const studyModes = [
+    { id: 'ai-info', label: 'AI 정보', icon: FaBrain, path: '/ai-info' },
+    { id: 'quiz', label: '퀴즈', icon: FaSparkles, path: '/quiz' },
+    { id: 'flashcards', label: '플래시카드', icon: FaBookOpen, component: 'flashcards' },
+    { id: 'review', label: '복습', icon: FaRandom, component: 'review' }
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* 학습 모드 선택 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {studyModes.map((mode) => (
+          <motion.button
+            key={mode.id}
+            className={`
+              glass rounded-2xl p-6 text-center border transition-all
+              ${activeStudyMode === mode.id 
+                ? 'border-blue-400/50 bg-blue-500/10' 
+                : 'border-white/10 hover:border-white/20'
+              }
+            `}
+            onClick={() => {
+              if (mode.path) {
+                window.location.href = mode.path
+              } else {
+                setActiveStudyMode(mode.id)
+              }
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <mode.icon className={`
+              text-3xl mx-auto mb-3
+              ${activeStudyMode === mode.id ? 'text-blue-400' : 'text-white/60'}
+            `} />
+            <div className="font-bold text-white mb-1">{mode.label}</div>
+            <div className="text-white/60 text-sm">
+              {mode.id === 'ai-info' ? 'AI 지식 학습' :
+               mode.id === 'quiz' ? '퀴즈 풀기' :
+               mode.id === 'flashcards' ? '카드 암기' : '복습하기'}
+            </div>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* 학습 콘텐츠 */}
+      {activeStudyMode === 'flashcards' && (
+        <div className="glass rounded-2xl p-6">
+          <h3 className="text-xl font-bold text-white mb-6">플래시카드 학습</h3>
+          <FlashcardStudy
+            flashcards={[]} // 실제 데이터로 교체
+            onComplete={(results) => {
+              addXP(results.correctCards * 10, '플래시카드 학습')
+              addPoints(results.correctCards * 5)
+              showToast(`${results.correctCards}/${results.totalCards} 카드를 학습했습니다!`)
+            }}
+            onUpdateCard={(cardId, isCorrect) => {
+              if (isCorrect) {
+                updateMissionProgress('learn_terms', 1)
+              }
+            }}
+          />
         </div>
       )}
 
-      {/* 탭 메뉴 */}
-      <div className="flex justify-center mb-6 md:mb-8">
-        <div className="flex flex-wrap gap-2 md:gap-4 bg-white/10 backdrop-blur-xl rounded-2xl p-2 md:p-3 shadow-lg border border-white/10">
-          {[
-            { id: 'ai', label: 'AI 정보', gradient: 'from-blue-500 to-purple-500' },
-            { id: 'quiz', label: '용어 퀴즈', gradient: 'from-purple-500 to-pink-500' },
-            { id: 'progress', label: '진행률', gradient: 'from-pink-500 to-blue-500' },
-            { id: 'news', label: 'AI 뉴스', gradient: 'from-blue-500 to-pink-500' },
-            { id: 'term', label: '용어 학습', gradient: 'from-purple-500 to-blue-500' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              className={`px-4 md:px-6 py-2 md:py-3 rounded-xl font-bold text-sm md:text-base transition-all ${
-                activeTab === tab.id 
-                  ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg` 
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
-              }`}
-              onClick={() => setActiveTab(tab.id as any)}
-            >
-              {tab.label}
-            </button>
-          ))}
+      {activeStudyMode === 'review' && (
+        <div className="glass rounded-2xl p-6">
+          <div className="text-center py-12">
+            <FaLightbulb className="text-6xl text-white/20 mx-auto mb-4" />
+            <p className="text-white/60 text-lg mb-2">복습할 항목이 없습니다</p>
+            <p className="text-white/40 text-sm">더 많이 학습하여 복습 항목을 만들어보세요!</p>
+          </div>
         </div>
-        <button 
-          onClick={handleRefresh} 
-          className="ml-3 md:ml-6 px-3 md:px-4 py-2 bg-white/20 backdrop-blur-xl text-white rounded-lg hover:bg-white/30 transition-all font-semibold shadow border border-white/10"
-        >
-          새로고침
-        </button>
+      )}
+    </div>
+  )
+}
+
+// 🎮 게임 섹션
+function GamesSection({ addXP, addPoints, showToast }: any) {
+  const [activeGame, setActiveGame] = useState<string | null>(null)
+
+  const games = [
+    { 
+      id: 'word-search', 
+      label: '워드서치', 
+      icon: FaPuzzlePiece, 
+      description: 'AI 용어를 찾아보세요',
+      difficulty: 'medium' as const
+    },
+    { 
+      id: 'matching', 
+      label: '매칭게임', 
+      icon: FaHeart, 
+      description: '용어와 정의를 매칭하세요',
+      difficulty: 'easy' as const  
+    }
+  ]
+
+  const mockWords = ['AI', 'Machine Learning', 'Deep Learning', 'Neural Network', 'Algorithm']
+  const mockPairs = [
+    { term: 'AI', definition: 'Artificial Intelligence' },
+    { term: 'ML', definition: 'Machine Learning' },
+    { term: 'DL', definition: 'Deep Learning' }
+  ]
+
+  return (
+    <div className="space-y-6">
+      {!activeGame ? (
+        <>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">학습 게임</h2>
+            <p className="text-white/60">재미있게 놀면서 학습하세요!</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {games.map((game) => (
+              <motion.button
+                key={game.id}
+                className="glass rounded-2xl p-8 text-center border border-white/10 hover:border-purple-400/30 hover:bg-purple-500/5 transition-all"
+                onClick={() => setActiveGame(game.id)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <game.icon className="text-6xl text-purple-400 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">{game.label}</h3>
+                <p className="text-white/60 mb-4">{game.description}</p>
+                <div className={`
+                  inline-block px-3 py-1 rounded-full text-sm font-medium
+                  ${game.difficulty === 'easy' ? 'bg-green-500/20 text-green-300' :
+                    game.difficulty === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                    'bg-red-500/20 text-red-300'}
+                `}>
+                  {game.difficulty === 'easy' ? '쉬움' : 
+                   game.difficulty === 'medium' ? '보통' : '어려움'}
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <motion.button
+              onClick={() => setActiveGame(null)}
+              className="glass p-3 rounded-xl"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ← 돌아가기
+            </motion.button>
+            <h3 className="text-xl font-bold text-white">
+              {games.find(g => g.id === activeGame)?.label}
+            </h3>
+          </div>
+
+          <div className="glass rounded-2xl p-6">
+            {activeGame === 'word-search' && (
+              <WordSearchPuzzle
+                words={mockWords}
+                difficulty="medium"
+                onComplete={(time, score) => {
+                  addXP(score / 10, '워드서치 완료')
+                  addPoints(score / 20)
+                  showToast(`${score}점 획득! (${time}초)`)
+                  setActiveGame(null)
+                }}
+              />
+            )}
+
+            {activeGame === 'matching' && (
+              <MatchingGame
+                pairs={mockPairs}
+                difficulty="easy"
+                onComplete={(time, score) => {
+                  addXP(score / 10, '매칭게임 완료')
+                  addPoints(score / 20)
+                  showToast(`${score}점 획득! (${time}초)`)
+                  setActiveGame(null)
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// 👥 소셜 섹션
+function SocialSection(props: any) {
+  const [activeTab, setActiveTab] = useState('leaderboard')
+
+  const tabs = [
+    { id: 'leaderboard', label: '랭킹', icon: FaTrophy },
+    { id: 'friends', label: '친구', icon: FaUsers },
+    { id: 'competitions', label: '대회', icon: FaMedal }
+  ]
+
+  // 모의 데이터
+  const mockLeaderboard = {
+    period: 'weekly' as const,
+    category: 'xp' as const,
+    entries: [
+      { rank: 1, userId: 'user1', username: '김학습', avatar: '', level: 15, score: 12500, change: 2 },
+      { rank: 2, userId: 'user2', username: '이공부', avatar: '', level: 12, score: 11200, change: -1 },
+      { rank: 3, userId: 'user3', username: '박지식', avatar: '', level: 14, score: 10800, change: 1 }
+    ],
+    lastUpdated: new Date().toISOString()
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 탭 네비게이션 */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {tabs.map((tab) => (
+          <motion.button
+            key={tab.id}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-xl font-medium whitespace-nowrap
+              ${activeTab === tab.id 
+                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white' 
+                : 'glass text-white/70 hover:text-white'
+              }
+            `}
+            onClick={() => setActiveTab(tab.id)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <tab.icon />
+            {tab.label}
+          </motion.button>
+        ))}
       </div>
 
-      {/* 메인 컨텐츠 */}
-      <main className="flex-1 pb-8 md:pb-12">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.5 }} 
-          className="max-w-4xl mx-auto"
-        >
-          {/* 탭별 컨텐츠 */}
-          {activeTab === 'ai' && (
-            <section className="mb-8 md:mb-16">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                {aiInfoFixed.length === 0 && (
-                  <div className="glass backdrop-blur-xl rounded-2xl p-6 md:p-8 flex flex-col items-center justify-center text-center text-white/70 shadow-xl min-h-[180px] border border-white/10">
-                    <FaBookOpen className="w-10 h-10 md:w-12 md:h-12 mb-3 opacity-60" />
-                    <span className="text-base md:text-lg font-semibold">AI 정보가 없습니다</span>
-                  </div>
-                )}
-                {aiInfoFixed.map((info, index) => {
-                  // 로컬 스토리지와 백엔드 데이터를 모두 확인하여 학습 상태 결정
-                  const isLearnedLocally = localProgress.includes(index)
-                  const isLearnedBackend = backendProgress.includes(index)
-                  const isLearned = isLearnedLocally || isLearnedBackend
-                  
-                  return (
-                    <AIInfoCard
-                      key={index}
-                      info={info}
-                      index={index}
-                      date={selectedDate}
-                      sessionId={sessionId}
-                      isLearned={isLearned}
-                      onProgressUpdate={handleProgressUpdate}
-                      forceUpdate={forceUpdate}
-                      setForceUpdate={setForceUpdate}
-                    />
-                  )
-                })}
-              </div>
-            </section>
-          )}
-          {activeTab === 'quiz' && (
-            <section className="mb-8 md:mb-16">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-6 md:mb-8 flex items-center gap-3 md:gap-4 drop-shadow">
-                <Target className="w-6 h-6 md:w-8 md:h-8" />
-                용어 퀴즈
-              </h2>
-              <TermsQuizSection 
-                sessionId={sessionId} 
-                selectedDate={selectedDate} 
-                onProgressUpdate={handleProgressUpdate}
-                onDateChange={setSelectedDate}
-              />
-            </section>
-          )}
-          {activeTab === 'progress' && (
-            <section className="mb-8 md:mb-16">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-6 md:mb-8 flex items-center gap-3 md:gap-4 drop-shadow">
-                <TrendingUp className="w-6 h-6 md:w-8 md:h-8" />
-                나의 학습 성장도
-              </h2>
-              <ProgressSection 
-                sessionId={sessionId} 
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
-              />
-            </section>
-          )}
-          {activeTab === 'news' && (
-            <section className="mb-8 md:mb-16">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-6 md:mb-8 flex items-center gap-3 md:gap-4 drop-shadow">
-                <FaBookOpen className="w-6 h-6 md:w-8 md:h-8" />
-                AI 뉴스
-              </h2>
-              {newsLoading ? (
-                <div className="text-white/80 text-center">뉴스를 불러오는 중...</div>
-              ) : news && news.length > 0 ? (
-                <div className="space-y-4 md:space-y-6">
-                  {news.map((item: any, idx: number) => (
-                    <a 
-                      key={idx} 
-                      href={item.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="block glass backdrop-blur-xl rounded-2xl p-4 md:p-6 shadow hover:bg-white/10 transition-all border border-white/10"
-                    >
-                      <h3 className="text-lg md:text-xl font-bold text-white mb-2 line-clamp-2">{item.title}</h3>
-                      <p className="text-white/80 mb-2 line-clamp-3">{item.content}</p>
-                      <span className="text-blue-300 text-sm">뉴스 원문 보기 →</span>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-white/70 text-center">AI 뉴스가 없습니다.</div>
-              )}
-            </section>
-          )}
-          {activeTab === 'term' && (
-            <section className="mb-8 md:mb-16">
-              <LearnedTermsSection sessionId={sessionId} />
-            </section>
-          )}
-        </motion.div>
-      </main>
+      {/* 탭 콘텐츠 */}
+      {activeTab === 'leaderboard' && (
+        <LeaderboardDisplay
+          leaderboard={mockLeaderboard}
+          currentUserId={props.sessionId}
+        />
+      )}
 
-      {/* 커스텀 애니메이션 스타일 */}
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
-          50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 3s infinite;
-        }
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-        .animate-blink {
-          animation: blink 1s infinite;
-        }
-        @keyframes fade-in-out {
-          0%, 100% { opacity: 0; transform: translateY(10px); }
-          20%, 80% { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-out {
-          animation: fade-in-out 3s ease-in-out infinite;
-        }
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: none; }
-        }
-        .animate-fade-in {
-          animation: fade-in 1.5s cubic-bezier(0.22,1,0.36,1) both;
-        }
-      `}</style>
+      {activeTab === 'friends' && (
+        <FriendsSystem
+          friends={[]}
+          onAddFriend={(username) => props.showToast(`${username}님께 친구 요청을 보냈습니다`)}
+          onChallenge={(friendId) => props.showToast('도전장을 보냈습니다!')}
+        />
+      )}
+
+      {activeTab === 'competitions' && (
+        <CompetitionSystem
+          competitions={[]}
+          onJoin={(id) => props.showToast('대회에 참가했습니다!')}
+        />
+      )}
+    </div>
+  )
+}
+
+// 🎯 집중 섹션
+function FocusSection(props: any) {
+  const [activeTab, setActiveTab] = useState('pomodoro')
+
+  const tabs = [
+    { id: 'pomodoro', label: '뽀모도로', icon: FaClock },
+    { id: 'reminders', label: '알림', icon: FaBell },
+    { id: 'calendar', label: '캘린더', icon: FaCalendarAlt }
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* 탭 네비게이션 */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {tabs.map((tab) => (
+          <motion.button
+            key={tab.id}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-xl font-medium whitespace-nowrap
+              ${activeTab === tab.id 
+                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white' 
+                : 'glass text-white/70 hover:text-white'
+              }
+            `}
+            onClick={() => setActiveTab(tab.id)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <tab.icon />
+            {tab.label}
+          </motion.button>
+        ))}
+      </div>
+
+      {/* 탭 콘텐츠 */}
+      {activeTab === 'pomodoro' && (
+        <PomodoroTimer
+          preferences={props.profile.preferences}
+          onComplete={(type) => {
+            if (type === 'work') {
+              props.addXP(50, '뽀모도로 완료')
+              props.updateMissionProgress('focus_time', 25)
+            }
+          }}
+        />
+      )}
+
+      {activeTab === 'reminders' && (
+        <SmartReminders
+          reminders={props.profile.preferences.studyReminders}
+          onAdd={(reminder) => props.showToast('새 알림이 추가되었습니다')}
+          onEdit={(id, reminder) => props.showToast('알림이 수정되었습니다')}
+          onDelete={(id) => props.showToast('알림이 삭제되었습니다')}
+          onToggle={(id) => props.showToast('알림 상태가 변경되었습니다')}
+        />
+      )}
+
+      {activeTab === 'calendar' && (
+        <StudyCalendar
+          studyData={{}}
+          reminders={props.profile.preferences.studyReminders}
+          onDateClick={(date) => props.showToast(`${date} 학습 내역을 확인하세요`)}
+        />
+      )}
+    </div>
+  )
+}
+
+// 📈 진행률 섹션
+function ProgressSection(props: any) {
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-white mb-2">학습 분석</h2>
+        <p className="text-white/60">상세한 학습 통계와 진행상황을 확인하세요</p>
+      </div>
+
+      {/* 데스크톱 히트맵 */}
+      <div className="hidden md:block">
+        <LearningHeatmap
+          data={[]}
+          onDateClick={(date, data) => props.showToast(`${date} 학습 내역`)}
+        />
+      </div>
+
+      {/* 모바일 히트맵 */}
+      <div className="block md:hidden">
+        <MobileHeatmap data={[]} months={6} />
+      </div>
+
+      {/* 추가 통계 카드들 */}
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="glass rounded-xl p-6 text-center">
+          <FaChartLine className="text-blue-400 text-3xl mx-auto mb-3" />
+          <div className="text-2xl font-bold text-white mb-1">85%</div>
+          <div className="text-white/60 text-sm">평균 정답률</div>
+        </div>
+        
+        <div className="glass rounded-xl p-6 text-center">
+          <FaClock className="text-green-400 text-3xl mx-auto mb-3" />
+          <div className="text-2xl font-bold text-white mb-1">2.5h</div>
+          <div className="text-white/60 text-sm">일일 평균 학습</div>
+        </div>
+        
+        <div className="glass rounded-xl p-6 text-center">
+          <FaTrophy className="text-yellow-400 text-3xl mx-auto mb-3" />
+          <div className="text-2xl font-bold text-white mb-1">{props.profile.achievements.filter((a: any) => a.isCompleted).length}</div>
+          <div className="text-white/60 text-sm">달성한 업적</div>
+        </div>
+      </div>
     </div>
   )
 } 

@@ -63,22 +63,22 @@ export default function AdminAIInfoPage() {
   // 프롬프트 데이터 로드
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const pData = localStorage.getItem('prompts')
-      if (pData) setPrompts(JSON.parse(pData))
-      const bData = localStorage.getItem('baseContents')
-      if (bData) setBaseContents(JSON.parse(bData))
+    const pData = localStorage.getItem('prompts')
+    if (pData) setPrompts(JSON.parse(pData))
+    const bData = localStorage.getItem('baseContents')
+    if (bData) setBaseContents(JSON.parse(bData))
     }
   }, [])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('prompts', JSON.stringify(prompts))
+    localStorage.setItem('prompts', JSON.stringify(prompts))
     }
   }, [prompts])
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('baseContents', JSON.stringify(baseContents))
+    localStorage.setItem('baseContents', JSON.stringify(baseContents))
     }
   }, [baseContents])
 
@@ -415,10 +415,10 @@ export default function AdminAIInfoPage() {
                 </div>
               </div>
               
-              <div className="grid gap-6">
-                {inputs.map((input, idx) => (
+        <div className="grid gap-6">
+          {inputs.map((input, idx) => (
                   <div key={idx} className="bg-white/5 rounded-xl border border-white/10 p-6 flex flex-col gap-3 relative">
-                    <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2">
                       <label className="font-semibold text-white/80">제목</label>
                       <input 
                         type="text" 
@@ -427,8 +427,8 @@ export default function AdminAIInfoPage() {
                         onChange={e => handleInputChange(idx, 'title', e.target.value)} 
                         className="p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                       />
-                    </div>
-                    <div className="flex flex-col gap-2">
+              </div>
+              <div className="flex flex-col gap-2">
                       <label className="font-semibold text-white/80">내용</label>
                       <textarea 
                         placeholder={`내용 ${idx+1}`} 
@@ -437,111 +437,111 @@ export default function AdminAIInfoPage() {
                         className="p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none" 
                         rows={3} 
                       />
-                    </div>
-                    
-                    {/* 용어 입력 섹션 */}
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between">
+              </div>
+                
+                {/* 용어 입력 섹션 */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
                         <label className="font-semibold text-white/80">관련 용어</label>
-                        <div className="flex gap-2">
-                          <button 
-                            type="button" 
-                            onClick={() => handleBulkTermsInput(idx)} 
+                    <div className="flex gap-2">
+                      <button 
+                        type="button" 
+                        onClick={() => handleBulkTermsInput(idx)} 
                             className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-lg font-medium hover:bg-purple-500/30 transition text-sm border border-purple-500/30"
-                            title="전문용어를 복사해서 붙여넣기"
-                          >
-                            📋 일괄 입력
-                          </button>
-                          <button 
-                            type="button" 
-                            onClick={() => handleAddTerm(idx)} 
+                        title="전문용어를 복사해서 붙여넣기"
+                      >
+                        📋 일괄 입력
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => handleAddTerm(idx)} 
                             className="px-3 py-1 bg-green-500/20 text-green-300 rounded-lg font-medium hover:bg-green-500/30 transition text-sm border border-green-500/30"
-                          >
-                            + 용어 추가
-                          </button>
+                      >
+                        + 용어 추가
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* 일괄 입력 모달 */}
+                  {showBulkInput === idx && (
+                        <div className="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-xl p-4 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-bold text-yellow-300">📋 전문용어 일괄 입력</h4>
+                        <button 
+                          type="button" 
+                          onClick={handleBulkTermsCancel}
+                              className="text-yellow-400 hover:text-yellow-200"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <div className="mb-3">
+                            <p className="text-sm text-yellow-200 mb-2">
+                          전문용어를 복사해서 붙여넣으세요. 탭(→) 또는 공백으로 구분됩니다.
+                        </p>
+                            <div className="text-xs text-yellow-300 bg-yellow-500/20 p-2 rounded mb-2">
+                          <strong>예시:</strong><br/>
+                          LLM	GPT 같은 대형 언어 모델<br/>
+                          자연어	우리가 일상에서 쓰는 언어<br/>
+                          DSL	특정 분야 전용 프로그래밍 언어
                         </div>
                       </div>
-                      
-                      {/* 일괄 입력 모달 */}
-                      {showBulkInput === idx && (
-                        <div className="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-xl p-4 mb-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="font-bold text-yellow-300">📋 전문용어 일괄 입력</h4>
-                            <button 
-                              type="button" 
-                              onClick={handleBulkTermsCancel}
-                              className="text-yellow-400 hover:text-yellow-200"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                          <div className="mb-3">
-                            <p className="text-sm text-yellow-200 mb-2">
-                              전문용어를 복사해서 붙여넣으세요. 탭(→) 또는 공백으로 구분됩니다.
-                            </p>
-                            <div className="text-xs text-yellow-300 bg-yellow-500/20 p-2 rounded mb-2">
-                              <strong>예시:</strong><br/>
-                              LLM	GPT 같은 대형 언어 모델<br/>
-                              자연어	우리가 일상에서 쓰는 언어<br/>
-                              DSL	특정 분야 전용 프로그래밍 언어
-                            </div>
-                          </div>
-                          <textarea
-                            value={bulkTermsText}
-                            onChange={(e) => setBulkTermsText(e.target.value)}
-                            placeholder="용어	뜻&#10;LLM	GPT 같은 대형 언어 모델&#10;자연어	우리가 일상에서 쓰는 언어"
+                      <textarea
+                        value={bulkTermsText}
+                        onChange={(e) => setBulkTermsText(e.target.value)}
+                        placeholder="용어	뜻&#10;LLM	GPT 같은 대형 언어 모델&#10;자연어	우리가 일상에서 쓰는 언어"
                             className="w-full p-3 bg-white/10 border border-yellow-500/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm resize-none"
-                            rows={6}
-                          />
-                          <div className="flex gap-2 mt-3">
-                            <button 
-                              type="button" 
-                              onClick={() => handleBulkTermsSubmit(idx)}
+                        rows={6}
+                      />
+                      <div className="flex gap-2 mt-3">
+                        <button 
+                          type="button" 
+                          onClick={() => handleBulkTermsSubmit(idx)}
                               className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition text-sm"
-                            >
-                              용어 추가
-                            </button>
-                            <button 
-                              type="button" 
-                              onClick={handleBulkTermsCancel}
+                        >
+                          용어 추가
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={handleBulkTermsCancel}
                               className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition text-sm"
-                            >
-                              취소
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {input.terms.map((term, termIdx) => (
-                        <div key={termIdx} className="flex gap-2 items-start">
-                          <div className="flex-1 flex gap-2">
-                            <input 
-                              type="text" 
-                              placeholder="용어" 
-                              value={term.term} 
-                              onChange={e => handleTermChange(idx, termIdx, 'term', e.target.value)} 
-                              className="flex-1 p-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                            />
-                            <input 
-                              type="text" 
-                              placeholder="용어 설명" 
-                              value={term.description} 
-                              onChange={e => handleTermChange(idx, termIdx, 'description', e.target.value)} 
-                              className="flex-1 p-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                            />
-                          </div>
-                          <button 
-                            type="button" 
-                            onClick={() => handleRemoveTerm(idx, termIdx)} 
-                            className="px-2 py-1 bg-red-500/20 text-red-300 rounded font-medium hover:bg-red-500/30 transition text-sm border border-red-500/30"
-                          >
-                            삭제
-                          </button>
-                        </div>
-                      ))}
+                        >
+                          취소
+                        </button>
+                      </div>
                     </div>
-                    
-                    {inputs.length > 1 && (
+                  )}
+                  
+                  {input.terms.map((term, termIdx) => (
+                    <div key={termIdx} className="flex gap-2 items-start">
+                      <div className="flex-1 flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="용어" 
+                          value={term.term} 
+                          onChange={e => handleTermChange(idx, termIdx, 'term', e.target.value)} 
+                              className="flex-1 p-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" 
+                        />
+                        <input 
+                          type="text" 
+                          placeholder="용어 설명" 
+                          value={term.description} 
+                          onChange={e => handleTermChange(idx, termIdx, 'description', e.target.value)} 
+                              className="flex-1 p-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm" 
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveTerm(idx, termIdx)} 
+                            className="px-2 py-1 bg-red-500/20 text-red-300 rounded font-medium hover:bg-red-500/30 transition text-sm border border-red-500/30"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+              {inputs.length > 1 && (
                       <button 
                         type="button" 
                         onClick={() => handleRemoveInput(idx)} 
@@ -549,10 +549,10 @@ export default function AdminAIInfoPage() {
                       >
                         <FaTimes />
                       </button>
-                    )}
-                  </div>
-                ))}
-              </div>
+              )}
+            </div>
+          ))}
+        </div>
               
               <button 
                 type="button" 
@@ -577,13 +577,13 @@ export default function AdminAIInfoPage() {
                 className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-purple-600 transition w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <FaSave className="w-4 h-4" />
-                {addOrUpdateMutation.isPending ? '등록 중...' : (editId ? '수정' : '등록')}
-              </button>
-            </form>
+          {addOrUpdateMutation.isPending ? '등록 중...' : (editId ? '수정' : '등록')}
+        </button>
+      </form>
             
             <div className="grid gap-4">
               {dates.length === 0 && <div className="text-white/50 text-center">등록된 AI 정보가 없습니다.</div>}
-              {dates.map(dateItem => (
+        {dates.map(dateItem => (
                 <div key={dateItem} className="bg-white/5 rounded-xl p-6 border border-white/10">
                   <div className="flex items-center justify-between mb-4">
                     <div className="text-blue-400 font-medium">{dateItem}</div>
@@ -605,11 +605,11 @@ export default function AdminAIInfoPage() {
                     </div>
                   </div>
                   
-                  {isFetching && date === dateItem ? (
+                {isFetching && date === dateItem ? (
                     <div className="text-white/50">불러오는 중...</div>
-                  ) : (
-                    aiInfos.length > 0 && date === dateItem ? (
-                      aiInfos.map((info, idx) => (
+                ) : (
+                  aiInfos.length > 0 && date === dateItem ? (
+                    aiInfos.map((info, idx) => (
                         <div key={idx} className="mb-4 last:mb-0 bg-white/5 rounded-lg p-4">
                           <div className="font-bold text-lg text-white mb-2">{info.title}</div>
                           <div className="text-white/70 text-sm whitespace-pre-line mb-3">{info.content}</div>
@@ -620,16 +620,16 @@ export default function AdminAIInfoPage() {
                             <FaEdit className="w-4 h-4" />
                             수정
                           </button>
-                        </div>
-                      ))
-                    ) : null
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
+                      </div>
+                    ))
+                  ) : null
+                )}
+              </div>
+        ))}
+      </div>
+      </section>
 
-          {/* 프롬프트 관리 */}
+      {/* 프롬프트 관리 */}
           <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
             <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
               <FaRobot className="text-pink-400" />
@@ -647,8 +647,8 @@ export default function AdminAIInfoPage() {
                     onChange={e => setPromptTitle(e.target.value)} 
                     className="p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-500/50" 
                   />
-                </div>
-                <div className="flex flex-col gap-2">
+          </div>
+          <div className="flex flex-col gap-2">
                   <label className="font-semibold text-white/80">프롬프트 내용</label>
                   <textarea 
                     placeholder="프롬프트 내용" 
@@ -657,7 +657,7 @@ export default function AdminAIInfoPage() {
                     className="p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-500/50 resize-none" 
                     rows={3} 
                   />
-                </div>
+          </div>
               </div>
               <div className="flex gap-2">
                 <button 
@@ -703,12 +703,12 @@ export default function AdminAIInfoPage() {
                     </div>
                   </div>
                   <div className="text-white/70 text-sm whitespace-pre-line bg-white/5 rounded-lg p-4">{p.content}</div>
-                </div>
-              ))}
             </div>
-          </section>
+          ))}
+        </div>
+      </section>
 
-          {/* 기반 내용 관리 */}
+      {/* 기반 내용 관리 */}
           <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
             <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
               <FaFileAlt className="text-green-400" />
@@ -726,8 +726,8 @@ export default function AdminAIInfoPage() {
                     onChange={e => setBaseTitle(e.target.value)} 
                     className="p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-500/50" 
                   />
-                </div>
-                <div className="flex flex-col gap-2">
+          </div>
+          <div className="flex flex-col gap-2">
                   <label className="font-semibold text-white/80">기반 내용</label>
                   <textarea 
                     placeholder="기반 내용" 
@@ -736,7 +736,7 @@ export default function AdminAIInfoPage() {
                     className="p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-500/50 resize-none" 
                     rows={3} 
                   />
-                </div>
+          </div>
               </div>
               <div className="flex gap-2">
                 <button 
@@ -780,13 +780,13 @@ export default function AdminAIInfoPage() {
                         삭제
                       </button>
                     </div>
-                  </div>
-                </div>
-              ))}
+              </div>
             </div>
-          </section>
+          ))}
+        </div>
+      </section>
 
-          {/* 프롬프트+기반내용 합치기 */}
+      {/* 프롬프트+기반내용 합치기 */}
           <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
             <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
               <FaCopy className="text-cyan-400" />
@@ -806,7 +806,7 @@ export default function AdminAIInfoPage() {
                   >
                     <option value="" className="bg-gray-800">프롬프트 선택</option>
                     {prompts.map(p => <option key={p.id} value={p.id} className="bg-gray-800">{p.title}</option>)}
-                  </select>
+          </select>
                 </div>
                 
                 <div className="flex flex-col gap-2">
@@ -818,7 +818,7 @@ export default function AdminAIInfoPage() {
                   >
                     <option value="" className="bg-gray-800">기반 내용 선택(선택사항)</option>
                     {baseContents.map(b => <option key={b.id} value={b.id} className="bg-gray-800">{b.title}</option>)}
-                  </select>
+          </select>
                 </div>
               </div>
               
@@ -839,10 +839,10 @@ export default function AdminAIInfoPage() {
                 className="mt-4 p-4 bg-white/5 border border-white/10 rounded-lg text-sm text-white/70 whitespace-pre-line outline-none min-h-[100px]" 
                 style={{userSelect:'text'}}
               >
-                {getCombinedText() || '선택된 프롬프트와 기반 내용이 여기에 미리보기로 표시됩니다.'}
-              </div>
-            </div>
-          </section>
+            {getCombinedText() || '선택된 프롬프트와 기반 내용이 여기에 미리보기로 표시됩니다.'}
+          </div>
+        </div>
+      </section>
         </div>
       </div>
     </div>
