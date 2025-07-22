@@ -628,13 +628,13 @@ function CompetitionCard({ competition, onJoin, onLeave, index, isUpcoming }: Co
     special: FaCrown
   }
 
-  const TypeIcon = typeIcons[competition.type]
+  const TypeIcon = typeIcons[competition.type as keyof typeof typeIcons] || FaCalendarAlt
 
   return (
     <motion.div
       className={`
         glass rounded-2xl p-6 border
-        ${typeStyles[competition.type]}
+        ${typeStyles[competition.type as keyof typeof typeStyles] || typeStyles.daily}
         ${isUpcoming ? 'opacity-60' : ''}
       `}
       initial={{ opacity: 0, y: 20 }}
