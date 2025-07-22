@@ -41,7 +41,7 @@ export default function ContentManagementPage() {
         setContents(data)
         
         // 카테고리 추출
-        const uniqueCategories = [...new Set(data.map((item: BaseContent) => item.category).filter(Boolean))]
+        const uniqueCategories = [...new Set(data.map((item: BaseContent) => item.category).filter(Boolean))] as string[]
         setCategories(uniqueCategories)
       }
     } catch (error) {
