@@ -38,6 +38,9 @@ export default function AdminStatsPage() {
   }, [])
 
   const loadStats = () => {
+    // 클라이언트 사이드에서만 실행
+    if (typeof window === 'undefined') return
+
     // 사용자 데이터
     const users = JSON.parse(localStorage.getItem('users') || '[]')
     const userProgress = JSON.parse(localStorage.getItem('userProgress') || '[]')

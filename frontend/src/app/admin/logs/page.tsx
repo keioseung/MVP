@@ -26,6 +26,9 @@ export default function LogsManagementPage() {
 
   // 로그 생성 함수
   const createLog = (type: LogEntry['type'], level: LogEntry['level'], action: string, details: string, user?: string) => {
+    // 클라이언트 사이드에서만 실행
+    if (typeof window === 'undefined') return
+
     const logEntry: LogEntry = {
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       timestamp: new Date().toISOString(),
@@ -46,6 +49,9 @@ export default function LogsManagementPage() {
 
   // 샘플 로그 생성
   const generateSampleLogs = () => {
+    // 클라이언트 사이드에서만 실행
+    if (typeof window === 'undefined') return
+
     const sampleLogs: Omit<LogEntry, 'id' | 'timestamp' | 'ip'>[] = [
       { type: 'user', level: 'info', action: '로그인', details: '사용자가 로그인했습니다', user: 'admin' },
       { type: 'user', level: 'info', action: '회원가입', details: '새 사용자가 등록되었습니다', user: 'user123' },
@@ -73,6 +79,9 @@ export default function LogsManagementPage() {
 
   // 로그 로드
   const loadLogs = () => {
+    // 클라이언트 사이드에서만 실행
+    if (typeof window === 'undefined') return
+
     const savedLogs = JSON.parse(localStorage.getItem('systemLogs') || '[]')
     setLogs(savedLogs)
     setFilteredLogs(savedLogs)

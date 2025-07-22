@@ -28,14 +28,17 @@ export default function SystemManagementPage() {
   })
 
   useEffect(() => {
-    // 백업 히스토리 로드
-    const history = JSON.parse(localStorage.getItem('backupHistory') || '[]')
-    setBackupHistory(history)
+    // 클라이언트 사이드에서만 실행
+    if (typeof window !== 'undefined') {
+      // 백업 히스토리 로드
+      const history = JSON.parse(localStorage.getItem('backupHistory') || '[]')
+      setBackupHistory(history)
 
-    // 설정 로드
-    const savedSettings = localStorage.getItem('systemSettings')
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings))
+      // 설정 로드
+      const savedSettings = localStorage.getItem('systemSettings')
+      if (savedSettings) {
+        setSettings(JSON.parse(savedSettings))
+      }
     }
   }, [])
 
@@ -399,11 +402,15 @@ export default function SystemManagementPage() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">{JSON.parse(localStorage.getItem('users') || '[]').length}</div>
+              <div className="text-2xl font-bold text-white">
+                {typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('users') || '[]').length : 0}
+              </div>
               <div className="text-white/70 text-sm">총 사용자</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-cyan-400">{JSON.parse(localStorage.getItem('aiInfos') || '[]').length}</div>
+              <div className="text-2xl font-bold text-cyan-400">
+                {typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('aiInfos') || '[]').length : 0}
+              </div>
               <div className="text-white/70 text-sm">AI 정보</div>
             </div>
             <div className="text-center">
