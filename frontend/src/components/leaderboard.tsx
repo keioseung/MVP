@@ -8,7 +8,7 @@ import {
 import { 
   FaTrophy, FaMedal, FaCrown, FaFire, FaChartLine, FaStar,
   FaUserFriends, FaGift, FaCalendarAlt, FaBolt, FaHeart,
-  FaRocket, FaGem, FaShield, FaUsers, FaArrowUp, FaArrowDown
+  FaRocket, FaGem, FaLock, FaUsers, FaArrowUp, FaArrowDown
 } from 'react-icons/fa'
 
 // 🏆 리더보드 메인 컴포넌트
