@@ -6,9 +6,12 @@ import { FaRobot, FaArrowRight, FaGlobe, FaCode, FaBrain, FaRocket, FaChartLine,
 
 const adminMenus = [
   { href: '/admin/ai-info', label: 'AI 정보 관리', icon: FaBrain, desc: 'AI 정보 등록, 수정, 삭제 등', color: 'from-blue-500 to-cyan-500' },
-  { href: '/admin/prompt', label: '프롬프트 관리', icon: FaComments, desc: 'AI 프롬프트 관리', color: 'from-green-500 to-emerald-500' },
+  { href: '/admin/quiz-management', label: '퀴즈 관리', icon: FaClipboard, desc: '퀴즈 생성, 수정, 삭제 및 토픽 관리', color: 'from-indigo-500 to-purple-500' },
+  { href: '/admin/content-management', label: '컨텐츠 관리', icon: FaBookOpen, desc: '학습 자료 및 기반 컨텐츠 관리', color: 'from-green-500 to-emerald-500' },
   { href: '/admin/users', label: '회원 관리', icon: FaUsers, desc: '회원 목록 조회, 역할 변경, 삭제 등', color: 'from-purple-500 to-indigo-500' },
-  { href: '/admin/stats', label: '사용자 통계', icon: FaChartBar, desc: '전체 사용자 학습/퀴즈 통계', color: 'from-yellow-500 to-orange-500' },
+  { href: '/admin/system', label: '시스템 관리', icon: FaCog, desc: '백업/복원, 시스템 설정 관리', color: 'from-gray-500 to-slate-500' },
+  { href: '/admin/stats', label: '사용자 통계', icon: FaChartBar, desc: '전체 사용자 학습/퀴즈 통계 및 대시보드', color: 'from-yellow-500 to-orange-500' },
+  { href: '/admin/logs', label: '로그 관리', icon: FaDatabase, desc: '사용자 활동 로그 및 시스템 이벤트 조회', color: 'from-red-500 to-pink-500' },
 ]
 
 export default function AdminPage() {
