@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Notification, Badge, GameAchievement } from '@/types'
 import { 
   FaBell, FaTrophy, FaStar, FaFire, FaGift, FaInfoCircle,
-  FaExclamationTriangle, FaCheckCircle, FaTimes
+  FaExclamationTriangle, FaCheckCircle, FaTimes, FaMagic
 } from 'react-icons/fa'
 
 // 알림 컨텍스트

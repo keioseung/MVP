@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   FaTrophy, FaFire, FaStar, FaGem, FaCrown, FaRocket, 
   FaThumbsUp, FaHeart, FaBolt, FaLock, FaLightbulb,
-  FaChartLine, FaMedal, FaGift
+  FaChartLine, FaMedal, FaGift, FaMagic
 } from 'react-icons/fa'
 import { UserProfile, Badge, GameAchievement, DailyMission } from '@/types'
 

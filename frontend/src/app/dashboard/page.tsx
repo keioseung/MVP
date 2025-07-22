@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   FaBell, FaRocket, FaTrophy, FaFire, FaCalendarAlt, FaBrain, 
   FaClock, FaUsers, FaChartLine, FaGem, FaStar, FaBookOpen,
-  FaHeart, FaLightbulb, FaPuzzlePiece, FaGift,
+  FaHeart, FaLightbulb, FaPuzzlePiece, FaGift, FaMagic,
   FaHeadphones, FaGamepad, FaMedal, FaRandom
 } from 'react-icons/fa'
 
